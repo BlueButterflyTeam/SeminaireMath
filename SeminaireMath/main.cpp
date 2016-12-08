@@ -13,6 +13,8 @@ GLFWwindow* window;
 #include <glm/glm.hpp>
 using namespace glm;
 
+#include "shader.h"
+
 int main(void)
 {
 	// Initialise GLFW
@@ -59,7 +61,7 @@ int main(void)
 	glBindVertexArray(VertexArrayID);
 
 	// Create and compile our GLSL program from the shaders
-	//GLuint programID = LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
+	GLuint programID = LoadShaders("shader/SimpleVertexShader.vertexshader", "shader/SimpleFragmentShader.fragmentshader");
 
 
 	static const GLfloat g_vertex_buffer_data[] = {
@@ -79,7 +81,7 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// Use our shader
-		//glUseProgram(programID);
+		glUseProgram(programID);
 
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -109,7 +111,7 @@ int main(void)
 	// Cleanup VBO
 	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteVertexArrays(1, &VertexArrayID);
-	//glDeleteProgram(programID);
+	glDeleteProgram(programID);
 
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
