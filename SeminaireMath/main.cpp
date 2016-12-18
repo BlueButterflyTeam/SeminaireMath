@@ -12,13 +12,20 @@ GLFWwindow* window;
 
 // Include GLM
 #include <glm/glm.hpp>
+#include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 using namespace glm;
 
 #include "shader.h"
 #include "texture.hpp"
 #include "objloader.hpp"
 #include "controls.hpp"
+
+#include "Game.h"
+#define SCREEN_HEIGHT 880
 
 int main(void)
 {
@@ -84,6 +91,8 @@ int main(void)
 
 	// Get a handle for our "MVP" uniform
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+	GLuint ViewMatrixID = glGetUniformLocation(programID, "V");
+	GLuint ModelMatrixID = glGetUniformLocation(programID, "M");
 
 	// Load the texture
 	GLuint Texture = loadDDS("uvmap.DDS");
@@ -109,6 +118,8 @@ int main(void)
 	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
 	glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
 
+	quat MyQuaternion;
+
 	do {
 
 		// Clear the screen
@@ -118,21 +129,33 @@ int main(void)
 		glUseProgram(programID);
 
 		// Compute the MVP matrix from keyboard and mouse input
-		computeMatricesFromInputs();
+		glm::mat4 ModelMatrix = computeMatricesFromInputs();
 		glm::mat4 ProjectionMatrix = getProjectionMatrix();
 		glm::mat4 ViewMatrix = getViewMatrix();
-		glm::mat4 ModelMatrix = glm::mat4(1.0);
+
+
+		//mat4 RotationMatrix = toMat4(MyQuaternion);
+
+		
+		//glm::mat4 TranslationMatrix = translate(mat4(), gPosition2); // A bit to the right
+		//glm::mat4 ScalingMatrix = scale(mat4(), vec3(1.0f, 1.0f, 1.0f));
+		//glm::mat4 ModelMatrix = RotationMatrix;
+
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
 		// Send our transformation to the currently bound shader, 
 		// in the "MVP" uniform
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+		glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+		glUniformMatrix4fv(ViewMatrixID, 1, GL_FALSE, &ViewMatrix[0][0]);
 
 		// Bind our texture in Texture Unit 0
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, Texture);
 		// Set our "myTextureSampler" sampler to user Texture Unit 0
 		glUniform1i(TextureID, 0);
+
+		glScalef(2, 2, 2);
 
 		// 1rst attribute buffer : vertices
 		glEnableVertexAttribArray(0);
@@ -163,14 +186,14 @@ int main(void)
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
 
 		// Swap buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
 	} // Check if the ESC key was pressed or the window was closed
-	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-		glfwWindowShouldClose(window) == 0);
+	while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
 
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
