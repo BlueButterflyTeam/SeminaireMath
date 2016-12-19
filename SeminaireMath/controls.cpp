@@ -37,6 +37,7 @@ float mouseSpeed = 0.005f;
 glm::quat cube_rotation;
 glm::mat4 cube_translation;
 glm::mat4 cube_scaling;
+glm::mat4 shearing_mat;
 
 glm::mat4 computeMatricesFromInputs(){
 	
@@ -150,25 +151,30 @@ glm::mat4 computeMatricesFromInputs(){
 	}
 
 	// -===- SHEARING -===-
-	// Shearing bigger left-right
+	// Shearing X-Y
 	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
 	{
-		cube_scaling += glm::scale(glm::vec3(2, 1, 1));
+		shearing_mat += glm::mat4(  1, 0, 0, 0,
+									0, 1, 0, 0,
+									2, 2, 1, 0,
+									0, 0, 0, 1);
 	}
-	// Shearing smaller left-right
+	// Shearing Y-Z
 	if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
 	{
-		cube_scaling += glm::scale(glm::vec3(.5, 1, 1));
+		shearing_mat += glm::mat4(  1, 2, 2, 0,
+									0, 1, 0, 0,
+									0, 0, 1, 0,
+									0, 0, 0, 1);
 	}
-	// Shearing bigger bottom-top
-	if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+
+	// -===- RESET -===-
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
 	{
-		cube_scaling += glm::scale(glm::vec3(1, 2, 1));
-	}
-	// Shearing smaller bottom-top
-	if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS)
-	{
-		cube_scaling += glm::scale(glm::vec3(1, .5, 1));
+		cube_translation = glm::mat4();
+		cube_rotation = glm::quat();
+		cube_scaling = glm::mat4();
+		shearing_mat = glm::mat4();
 	}
 
 	float FoV = initialFoV;// - 5 * glfwGetMouseWheel(); // Now GLFW 3 requires setting up a callback for this. It's a bit too complicated for this beginner's tutorial, so it's disabled instead.
@@ -185,5 +191,5 @@ glm::mat4 computeMatricesFromInputs(){
 	// For the next frame, the "last time" will be "now"
 	lastTime = currentTime;
 
-	return cube_translation * toMat4(cube_rotation) * cube_scaling;
+	return cube_translation * toMat4(cube_rotation) * shearing_mat * cube_scaling;
 }

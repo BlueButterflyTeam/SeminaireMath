@@ -24,7 +24,6 @@ using namespace glm;
 #include "objloader.hpp"
 #include "controls.hpp"
 
-#include "Game.h"
 #define SCREEN_HEIGHT 880
 
 int main(void)
@@ -103,10 +102,9 @@ int main(void)
 	// Read our .obj file
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec2> uvs;
-	std::vector<glm::vec3> normals; // Won't be used at the moment.
-	bool res = loadOBJ("cube.obj", vertices, uvs, normals);
+	std::vector<glm::vec3> normals;
+	bool res = loadOBJ("obj/cube.obj", vertices, uvs, normals);
 
-	// Load it into a VBO
 
 	GLuint vertexbuffer;
 	glGenBuffers(1, &vertexbuffer);
@@ -121,7 +119,6 @@ int main(void)
 	quat MyQuaternion;
 
 	do {
-
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -132,14 +129,6 @@ int main(void)
 		glm::mat4 ModelMatrix = computeMatricesFromInputs();
 		glm::mat4 ProjectionMatrix = getProjectionMatrix();
 		glm::mat4 ViewMatrix = getViewMatrix();
-
-
-		//mat4 RotationMatrix = toMat4(MyQuaternion);
-
-		
-		//glm::mat4 TranslationMatrix = translate(mat4(), gPosition2); // A bit to the right
-		//glm::mat4 ScalingMatrix = scale(mat4(), vec3(1.0f, 1.0f, 1.0f));
-		//glm::mat4 ModelMatrix = RotationMatrix;
 
 		glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
 
